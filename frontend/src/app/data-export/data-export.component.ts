@@ -22,7 +22,24 @@ import { MatIconModule } from '@angular/material/icon'
   selector: 'app-data-export',
   templateUrl: './data-export.component.html',
   styleUrls: ['./data-export.component.scss'],
-  imports: [FlexModule, MatCardModule, TranslateModule, NgIf, MatRadioGroup, FormsModule, ReactiveFormsModule, MatLabel, MatRadioButton, MatFormFieldModule, MatInputModule, MatHint, MatError, MatButtonModule, MatIconModule]
+  standalone: true,
+  imports: [
+    FlexModule,
+    MatCardModule,
+    TranslateModule,
+    NgIf,
+    MatRadioGroup,
+    FormsModule,
+    ReactiveFormsModule,
+    MatLabel,
+    MatRadioButton,
+    MatFormFieldModule,
+    MatInputModule,
+    MatHint,
+    MatError,
+    MatButtonModule,
+    MatIconModule
+  ]
 })
 export class DataExportComponent implements OnInit {
   public captchaControl: UntypedFormControl = new UntypedFormControl('', [Validators.required, Validators.minLength(5)])
@@ -35,37 +52,50 @@ export class DataExportComponent implements OnInit {
   public presenceOfCaptcha: boolean = false
   public userData: any
 
-  constructor (public sanitizer: DomSanitizer, private readonly imageCaptchaService: ImageCaptchaService, private readonly dataSubjectService: DataSubjectService) { }
+  constructor (
+    public sanitizer: DomSanitizer,
+    private readonly imageCaptchaService: ImageCaptchaService,
+    private readonly dataSubjectService: DataSubjectService
+  ) { }
+
   ngOnInit (): void {
     this.needCaptcha()
     this.dataRequest = {}
   }
 
-  needCaptcha () {
+  needCaptcha (): void {
     const nowTime = new Date()
-    const timeOfCaptcha = localStorage.getItem('lstdtxprt') ? new Date(JSON.parse(String(localStorage.getItem('lstdtxprt')))) : new Date(0)
+    const timeOfCaptcha = localStorage.getItem('lstdtxprt')
+      ? new Date(JSON.parse(String(localStorage.getItem('lstdtxprt'))))
+      : new Date(0)
     if (nowTime.getTime() - timeOfCaptcha.getTime() < 300000) {
       this.getNewCaptcha()
       this.presenceOfCaptcha = true
     }
   }
 
-  getNewCaptcha () {
+  getNewCaptcha (): void {
     this.imageCaptchaService.getCaptcha().subscribe((data: any) => {
       this.captcha = this.sanitizer.bypassSecurityTrustHtml(data.image)
     })
   }
 
-  save () {
+  save (): void {
     if (this.presenceOfCaptcha) {
       this.dataRequest.answer = this.captchaControl.value
     }
     this.dataRequest.format = this.formatControl.value
+
     this.dataSubjectService.dataExport(this.dataRequest).subscribe((data: any) => {
       this.error = null
       this.confirmation = data.confirmation
       this.userData = data.userData
-      window.open('', '_blank', 'width=500')?.document.write(this.userData)
+
+      // ✅ Secure alternative to document.write
+      const blob = new Blob([this.userData], { type: 'text/html' })
+      const blobUrl = URL.createObjectURL(blob)
+      window.open(blobUrl, '_blank', 'width=500')
+
       this.lastSuccessfulTry = new Date()
       localStorage.setItem('lstdtxprt', JSON.stringify(this.lastSuccessfulTry))
       this.ngOnInit()
@@ -77,7 +107,7 @@ export class DataExportComponent implements OnInit {
     })
   }
 
-  resetForm () {
+  resetForm (): void {
     this.captchaControl.markAsUntouched()
     this.captchaControl.markAsPristine()
     this.captchaControl.setValue('')
@@ -86,7 +116,7 @@ export class DataExportComponent implements OnInit {
     this.formatControl.setValue('')
   }
 
-  resetFormError () {
+  resetFormError (): void {
     this.captchaControl.markAsUntouched()
     this.captchaControl.markAsPristine()
     this.captchaControl.setValue('')

@@ -117,6 +117,7 @@
     ]
   },
   "dependencies": {
+    "@types/mongodb": "^4.0.6",
     "body-parser": "^1.20.2",
     "check-dependencies": "^1.1.1",
     "check-internet-connected": "^2.0.6",
@@ -160,6 +161,7 @@
     "libxmljs2": "~0.37.0",
     "marsdb": "^0.6.11",
     "median": "^0.0.2",
+    "mongodb": "^6.17.0",
     "morgan": "^1.10.0",
     "multer": "^2.0.1",
     "node-pre-gyp": "^0.15.0",
